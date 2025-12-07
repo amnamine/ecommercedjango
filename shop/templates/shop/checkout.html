@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Checkout · E‑Shop{% endblock %}
+{% block content %}
+<h1 class="h1">Checkout</h1>
+<form method="post" class="form card">
+  {% csrf_token %}
+  <input name="full_name" placeholder="Full name" required />
+  <input name="address" placeholder="Address" required />
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
+    <input name="city" placeholder="City" required />
+    <input name="zip" placeholder="ZIP" required />
+  </div>
+  <button class="btn" type="submit">Place order</button>
+</form>
+{% endblock %}

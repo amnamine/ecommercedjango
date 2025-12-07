@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Wishlist · E‑Shop{% endblock %}
+{% block content %}
+<h1 class="h1">Your Wishlist</h1>
+<div class="grid">
+  {% for p in products %}
+  <div class="card hover-rise">
+    <div class="img" style="background-image:url('{{ p.image_url }}')"></div>
+    <div class="card-body">
+      <h3 class="card-title">{{ p.name }}</h3>
+      <p class="card-price">${{ p.price }}</p>
+      <div class="actions">
+        <a class="btn" href="{% url 'shop:add_to_cart' p.id %}">Add to cart</a>
+        <a class="btn outline" href="{% url 'shop:wishlist_remove' p.id %}">Remove</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+    <p class="muted">No items in wishlist.</p>
+  {% endfor %}
+</div>
+{% endblock %}

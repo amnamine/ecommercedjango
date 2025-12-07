@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard · E‑Shop{% endblock %}
+{% block content %}
+<h1 class="h1">Admin Dashboard</h1>
+
+<section class="stats-grid">
+  <div class="stat-card">
+    <div class="muted">Users</div>
+    <div class="h2">{{ total_users }}</div>
+    <div class="muted">+{{ new_users }} last 7 days</div>
+  </div>
+  <div class="stat-card">
+    <div class="muted">Orders</div>
+    <div class="h2">{{ orders_count }}</div>
+    <div class="muted">Avg ${{ avg_order|floatformat:2 }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="muted">Revenue</div>
+    <div class="h2">${{ revenue|floatformat:2 }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="muted">Products</div>
+    <div class="h2">{{ products_count }}</div>
+    <div class="muted">{{ categories_count }} categories</div>
+  </div>
+  <div class="stat-card">
+    <div class="muted">Reviews</div>
+    <div class="h2">{{ reviews_count }}</div>
+    <div class="muted">Avg {{ avg_rating|floatformat:1 }}/5</div>
+  </div>
+</section>
+
+<section>
+  <h2 class="h2">Top Products</h2>
+  <div class="cards">
+    {% for p in top_products %}
+      <div class="card">
+        <div class="card-body">
+          <strong>{{ p.product__name }}</strong>
+          <div class="muted">Sold: {{ p.qty }}</div>
+          <div class="bar"><span style="width:{{ p.qty|add:0|floatformat:0 }}0%"></span></div>
+          <div class="muted">Revenue: ${{ p.revenue|floatformat:2 }}</div>
+        </div>
+      </div>
+    {% empty %}
+      <p class="muted">No sales data yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <h2 class="h2">Recent Orders</h2>
+  <div class="table">
+    <div class="thead">
+      <div>ID</div><div>User</div><div>Total</div><div>Date</div>
+    </div>
+    {% for o in recent_orders %}
+      <div class="tr">
+        <div>#{{ o.id }}</div>
+        <div>{{ o.user.username }}</div>
+        <div>${{ o.total }}</div>
+        <div>{{ o.placed_at }}</div>
+      </div>
+    {% empty %}
+      <p class="muted">No orders yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <h2 class="h2">Users</h2>
+  <form method="get" class="filter">
+    <input name="q" placeholder="Search username/email" value="{{ q }}" />
+    <button class="btn" type="submit">Search</button>
+  </form>
+  <div class="table">
+    <div class="thead"><div>Username</div><div>Email</div><div>Joined</div><div>Staff</div><div>Last login</div></div>
+    {% for u in users %}
+    <div class="tr">
+      <div>{{ u.username }}</div>
+      <div>{{ u.email }}</div>
+      <div>{{ u.date_joined }}</div>
+      <div>{% if u.is_staff %}Yes{% else %}No{% endif %}</div>
+      <div>{{ u.last_login }}</div>
+    </div>
+    {% empty %}
+    <p class="muted">No users found.</p>
+    {% endfor %}
+  </div>
+  <p class="muted">Passwords are securely hashed; they are never displayed.</p>
+</section>
+{% endblock %}

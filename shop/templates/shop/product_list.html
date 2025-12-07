@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Products · E‑Shop{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1 class="h1 slide-up">Discover Our Products</h1>
+  <form method="get" class="filter">
+    <input type="text" name="q" placeholder="Search products" value="{{ q }}" />
+    <select name="category">
+      <option value="">All Categories</option>
+      {% for c in categories %}
+      <option value="{{ c.slug }}" {% if active_category == c.slug %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <select name="sort">
+      <option value="new" {% if sort == 'new' %}selected{% endif %}>Newest</option>
+      <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price ↑</option>
+      <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price ↓</option>
+    </select>
+    <button class="btn" type="submit">Apply</button>
+  </form>
+</section>
+
+<div class="grid">
+  {% for p in products %}
+  <a class="card hover-rise" href="{% url 'shop:product_detail' p.id %}">
+    <div class="img" style="background-image:url('{{ p.image_url }}')"></div>
+    <div class="card-body">
+      <h3 class="card-title">{{ p.name }}</h3>
+      <p class="card-price">${{ p.price }}</p>
+      {% if p.category %}<span class="badge">{{ p.category.name }}</span>{% endif %}
+    </div>
+  </a>
+  {% empty %}
+    <p>No products yet.</p>
+  {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if products.has_previous %}
+    <a class="link" href="?q={{ q }}&category={{ active_category }}&sort={{ sort }}&page={{ products.previous_page_number }}">Prev</a>
+  {% endif %}
+  <span class="muted">Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+  {% if products.has_next %}
+    <a class="link" href="?q={{ q }}&category={{ active_category }}&sort={{ sort }}&page={{ products.next_page_number }}">Next</a>
+  {% endif %}
+</div>
+
+<section class="api">
+  <h2>API</h2>
+  <pre class="code">/api/products/</pre>
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Your Orders · E‑Shop{% endblock %}
+{% block content %}
+<h1 class="h1">Your Orders</h1>
+<div class="grid">
+  {% for o in orders %}
+  <div class="card">
+    <div class="card-body">
+      <h3 class="card-title">Order #{{ o.id }}</h3>
+      <p class="muted">{{ o.placed_at }}</p>
+      <p>Total: ${{ o.total }}</p>
+      <div class="items">
+        {% for it in o.items.all %}
+          <div>{{ it.product.name }} × {{ it.quantity }} (${{ it.price }})</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+    <p class="muted">No orders yet.</p>
+  {% endfor %}
+{% endblock %}

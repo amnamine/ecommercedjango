@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}E-Shop{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+  <header class="nav">
+    <a href="/" class="brand">E‑Shop</a>
+    <nav class="links">
+      <a href="/" class="link">Products</a>
+      <a href="/cart/" class="link">Cart</a>
+      {% if user.is_authenticated %}
+        <span class="user">Hi, {{ user.username }}</span>
+        {% if user.is_staff %}<a href="/accounts/dashboard/" class="link">Dashboard</a>{% endif %}
+        <a href="/accounts/logout/" class="btn">Logout</a>
+      {% else %}
+        <a href="/accounts/login/" class="btn">Login</a>
+        <a href="/accounts/register/" class="btn outline">Register</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main class="container fade-in">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p>© {{ now|date:'Y' }} E‑Shop. All rights reserved.</p>
+  </footer>
+
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} · E‑Shop{% endblock %}
+{% block content %}
+<div class="detail">
+  <div class="detail-img hover-rise" style="background-image:url('{{ product.image_url }}')"></div>
+  <div class="detail-info slide-up">
+    <h1 class="h2">{{ product.name }}</h1>
+    <p class="muted">{{ product.description }}</p>
+    <p class="price">${{ product.price }}</p>
+    <p class="muted">Avg rating: {{ avg|floatformat:1 }}/5</p>
+    <div class="actions">
+      <a class="btn" href="{% url 'shop:add_to_cart' product.id %}">Add to cart</a>
+      <a class="btn outline" href="{% url 'shop:wishlist_add' product.id %}">Wishlist</a>
+    </div>
+  </div>
+</div>
+
+<section class="reviews">
+  <h3 class="h2">Reviews</h3>
+  {% for r in reviews %}
+    <div class="card">
+      <div class="card-body">
+        <strong>{{ r.user.username }}</strong>
+        <span class="muted">rated {{ r.rating }}/5</span>
+        <p>{{ r.text }}</p>
+      </div>
+    </div>
+  {% empty %}
+    <p class="muted">No reviews yet.</p>
+  {% endfor %}
+  {% if user.is_authenticated %}
+  <form method="post" action="{% url 'shop:add_review' product.id %}" class="form card">
+    {% csrf_token %}
+    <label>Rating</label>
+    <select name="rating">
+      <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
+    </select>
+    <label>Review</label>
+    <textarea name="text"></textarea>
+    <button class="btn" type="submit">Submit review</button>
+  </form>
+  {% else %}
+    <p class="muted">Login to add a review.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Order Success · E‑Shop{% endblock %}
+{% block content %}
+<div class="success slide-up">
+  <h1 class="h1">Order placed</h1>
+  <p class="muted">Your order ID is #{{ order.id }}.</p>
+  <a class="btn" href="{% url 'shop:orders' %}">View your orders</a>
+  <a class="btn outline" href="{% url 'shop:product_list' %}">Continue shopping</a>
+</div>
+{% endblock %}
