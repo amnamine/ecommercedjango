@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q, Avg
-from .models import Product, Category, Review, Order, OrderItem
+from .models import Product, Category, Review, Order, OrderItem, Coupon
 
 
 def product_list(request):
@@ -15,6 +15,7 @@ def product_list(request):
         base = base.filter(Q(name__icontains=q) | Q(description__icontains=q))
     if cat:
         base = base.filter(category__slug=cat)
+    base = base.annotate(avg_rating=Avg('reviews__rating'))
     if sort == 'price_asc':
         base = base.order_by('price')
     elif sort == 'price_desc':
@@ -25,19 +26,35 @@ def product_list(request):
     page = request.GET.get('page')
     products = paginator.get_page(page)
     categories = Category.objects.all()
+    featured = Product.objects.filter(featured=True).order_by('-created_at')[:6]
+    rv_ids = request.session.get('recently_viewed', [])
+    recently = Product.objects.filter(id__in=rv_ids)
     return render(request, 'shop/product_list.html', {
         'products': products,
         'q': q,
         'categories': categories,
         'active_category': cat,
         'sort': sort,
+        'featured': featured,
+        'recently': recently,
     })
+
+
+def category_page(request, slug):
+    request.GET = request.GET.copy()
+    request.GET['category'] = slug
+    return product_list(request)
 
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
     avg = product.reviews.aggregate(avg=Avg('rating'))['avg'] or 0
     reviews = product.reviews.select_related('user')
+    rv = request.session.setdefault('recently_viewed', [])
+    if pk not in rv:
+        rv.insert(0, pk)
+        request.session['recently_viewed'] = rv[:10]
+        request.session.modified = True
     return render(request, 'shop/product_detail.html', {'product': product, 'avg': avg, 'reviews': reviews})
 
 
@@ -76,6 +93,24 @@ def view_cart(request):
     return render(request, 'shop/cart.html', {'items': items, 'total': total})
 
 
+def update_cart(request, pk):
+    cart = _get_cart(request.session)
+    qty = int(request.POST.get('qty', '1'))
+    key = str(pk)
+    if qty <= 0:
+        cart.pop(key, None)
+    else:
+        cart[key] = qty
+    request.session.modified = True
+    return redirect('shop:view_cart')
+
+
+def clear_cart(request):
+    request.session['cart'] = {}
+    request.session.modified = True
+    return redirect('shop:view_cart')
+
+
 @login_required
 def checkout(request):
     cart = _get_cart(request.session)
@@ -93,9 +128,18 @@ def checkout(request):
             price = product.price
             total += price * qty
             items.append((product, qty, price))
-        order = Order.objects.create(user=request.user, full_name=full_name, address=address, city=city, zip=zipc, total=total)
+        coupon_code = request.POST.get('coupon', '').strip()
+        discount_amount = 0
+        if coupon_code:
+            cp = Coupon.objects.filter(code__iexact=coupon_code, active=True).first()
+            if cp:
+                discount_amount = (total * cp.discount_percent) / 100
+        grand_total = total - discount_amount
+        order = Order.objects.create(user=request.user, full_name=full_name, address=address, city=city, zip=zipc, total=grand_total, coupon_code=coupon_code, discount_amount=discount_amount)
         for product, qty, price in items:
             OrderItem.objects.create(order=order, product=product, quantity=qty, price=price)
+            product.stock = max(0, product.stock - qty)
+            product.save()
         request.session['cart'] = {}
         request.session.modified = True
         return redirect('shop:order_success', order.id)
@@ -173,3 +217,8 @@ def product_json(request, pk):
         'stock': p.stock,
     }
     return JsonResponse(data)
+
+
+def categories_json(request):
+    cats = Category.objects.all().values('id', 'name', 'slug')
+    return JsonResponse({'categories': list(cats)})

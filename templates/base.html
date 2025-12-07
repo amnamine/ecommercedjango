@@ -15,7 +15,8 @@
     <a href="/" class="brand">E‑Shop</a>
     <nav class="links">
       <a href="/" class="link">Products</a>
-      <a href="/cart/" class="link">Cart</a>
+      <a href="/wishlist/" class="link">Wishlist{% if wishlist_count %} ({{ wishlist_count }}){% endif %}</a>
+      <a href="/cart/" class="link">Cart{% if cart_count %} ({{ cart_count }}){% endif %}</a>
       {% if user.is_authenticated %}
         <span class="user">Hi, {{ user.username }}</span>
         {% if user.is_staff %}<a href="/accounts/dashboard/" class="link">Dashboard</a>{% endif %}
@@ -28,6 +29,11 @@
   </header>
 
   <main class="container fade-in">
+    {% if messages %}
+      <div class="messages">
+        {% for m in messages %}<div class="msg">{{ m }}</div>{% endfor %}
+      </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 

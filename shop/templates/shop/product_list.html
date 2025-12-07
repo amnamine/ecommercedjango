@@ -20,16 +20,42 @@
   </form>
 </section>
 
+{% if featured %}
+<section>
+  <h2 class="h2">Featured</h2>
+  <div class="grid">
+    {% for p in featured %}
+    <div class="card hover-rise">
+      <a href="{% url 'shop:product_detail' p.id %}"><img class="img-el" src="{{ p.image_url }}" alt="{{ p.name }}" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22360%22><rect width=%22600%22 height=%22360%22 fill=%22%230b1222%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%238aa0b6%22 font-size=%2232%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>Image unavailable</text></svg>'" /></a>
+      <div class="card-body">
+        <h3 class="card-title">{{ p.name }}</h3>
+        <p class="card-price">${{ p.price }}</p>
+        <span class="badge">Featured</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <div class="grid">
   {% for p in products %}
-  <a class="card hover-rise" href="{% url 'shop:product_detail' p.id %}">
-    <div class="img" style="background-image:url('{{ p.image_url }}')"></div>
+  <div class="card hover-rise">
+    <a href="{% url 'shop:product_detail' p.id %}">
+      <img class="img-el" src="{{ p.image_url }}" alt="{{ p.name }}" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22360%22><rect width=%22600%22 height=%22360%22 fill=%22%230b1222%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%238aa0b6%22 font-size=%2232%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>Image unavailable</text></svg>'" />
+    </a>
     <div class="card-body">
       <h3 class="card-title">{{ p.name }}</h3>
       <p class="card-price">${{ p.price }}</p>
       {% if p.category %}<span class="badge">{{ p.category.name }}</span>{% endif %}
+      {% if p.avg_rating %}<span class="badge">★ {{ p.avg_rating|floatformat:1 }}</span>{% endif %}
+      <div class="actions" style="margin-top:8px;display:flex;gap:8px">
+        <a class="btn" href="{% url 'shop:add_to_cart' p.id %}">Add to cart</a>
+        <a class="btn outline" href="{% url 'shop:product_detail' p.id %}">Details</a>
+        <a class="btn outline" href="{% url 'shop:wishlist_add' p.id %}">Wishlist</a>
+      </div>
     </div>
-  </a>
+  </div>
   {% empty %}
     <p>No products yet.</p>
   {% endfor %}
@@ -45,8 +71,25 @@
   {% endif %}
 </div>
 
-<section class="api">
-  <h2>API</h2>
-  <pre class="code">/api/products/</pre>
+<section>
+  <p class="muted">Browse by category:
+    {% for c in categories %}
+      <a class="link" href="{% url 'shop:category' c.slug %}">{{ c.name }}</a>
+    {% endfor %}
+  </p>
 </section>
+
+{% if recently %}
+<section>
+  <h2 class="h2">Recently viewed</h2>
+  <div class="grid">
+    {% for p in recently %}
+    <a class="card" href="{% url 'shop:product_detail' p.id %}">
+      <div class="img" style="background-image:url('{{ p.image_url }}')"></div>
+      <div class="card-body"><h3 class="card-title">{{ p.name }}</h3></div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 {% endblock %}

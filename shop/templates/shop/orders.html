@@ -8,7 +8,7 @@
     <div class="card-body">
       <h3 class="card-title">Order #{{ o.id }}</h3>
       <p class="muted">{{ o.placed_at }}</p>
-      <p>Total: ${{ o.total }}</p>
+      <p>Total: ${{ o.total }} {% if o.discount_amount %}<span class="badge">Saved ${{ o.discount_amount }}{% if o.coupon_code %} with {{ o.coupon_code }}{% endif %}</span>{% endif %}</p>
       <div class="items">
         {% for it in o.items.all %}
           <div>{{ it.product.name }} × {{ it.quantity }} (${{ it.price }})</div>

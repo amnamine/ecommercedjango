@@ -6,7 +6,11 @@
   {% for item in items %}
     <div class="cart-row hover-rise">
       <div class="cart-name">{{ item.product.name }}</div>
-      <div class="cart-qty">x{{ item.qty }}</div>
+      <form method="post" action="{% url 'shop:update_cart' item.product.id %}" class="cart-qty" style="display:flex;gap:8px;align-items:center">
+        {% csrf_token %}
+        <input type="number" name="qty" min="0" value="{{ item.qty }}" style="width:70px" />
+        <button class="btn" type="submit">Update</button>
+      </form>
       <div class="cart-price">${{ item.subtotal }}</div>
       <a class="btn outline" href="{% url 'shop:remove_from_cart' item.product.id %}">−</a>
     </div>
@@ -19,6 +23,7 @@
   </div>
   {% if items %}
   <a class="btn" href="{% url 'shop:checkout' %}">Checkout</a>
+  <a class="btn outline" href="{% url 'shop:clear_cart' %}">Clear cart</a>
   {% endif %}
 </div>
 {% endblock %}
